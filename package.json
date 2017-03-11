@@ -1,0 +1,26 @@
+{
+  "name": "node-memcached-client",
+  "version": "0.6.0",
+  "description": "Memcached client library for nodejs with ES6 promisified methods Edit",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ysugimoto/node-memcached-client.git"
+  },
+  "keywords": [
+    "nodejs",
+    "memcached"
+  ],
+  "author": "Yoshiaki Sugimoto",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ysugimoto/node-memcached-client/issues"
+  },
+  "homepage": "https://github.com/ysugimoto/node-memcached-client#readme"
+}
