@@ -1,1 +1,1 @@
-module.exports = require('./lib/memcached.js');
+module.exports = require('./libs/memcached.js');
