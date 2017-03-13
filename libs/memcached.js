@@ -10,7 +10,7 @@ const DEFAULT_OPTIONS = {
   port: 11211,
   autoreconnect: false,
   reconnectDuration: 2000,
-  maxRetryConnectCount: 0
+  maxRetryConnectCount: 10
 };
 
 /**

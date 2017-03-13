@@ -47,4 +47,13 @@ client.connect()
 |   reconnectDuration  |  Number |      2000     | Duration time of reconnect (msec) |
 | maxRetryConnectCount |  Numer  |       10      |      Retry times to reconnect     |
 
+## Connection Pooling Settings
+
+Pooling configuration enable to change by environment variables:
+
+|                  name                 |  type  | default value |                   description                   |
+|:-------------------------------------:|:------:|:-------------:|:-----------------------------------------------:|
+|     MEMCACHED_CLIENT_MAX_POOL_SIZE    | Number |       1       | Connection pooling size per host:port signature |
+| MEMCACHED_CLIENT_SCALE_THRESHOLD_SIZE | Number |      100      |     Threshold to increase client connection     |
+
 

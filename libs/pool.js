@@ -65,6 +65,7 @@ class ConnectionPool {
       }
     }
 
+    // Use pooling connection
     Logger.info(`Returns pool connection, sid: ${connections[0].sid}`);
     return {connection: connections[0], created: false};
   }
@@ -91,6 +92,6 @@ class ConnectionPool {
 }
 
 module.exports = new ConnectionPool(
-  process.env.MEMCACHED_MAX_POOL_SIZE || 1,
-  process.env.MEMCACHED_SCALE_THRESHOLD_SIZE || 100
+  process.env.MEMCACHED_CLIENT_MAX_POOL_SIZE || 1,
+  process.env.MEMCACHED_CLIENT_SCALE_THRESHOLD_SIZE || 100
 );
