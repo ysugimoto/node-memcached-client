@@ -24,9 +24,8 @@ const client = new Memcached({
   port: 11211
 });
 
-client.connect()
-.then(conn  => {
-  conn.set('foo', 'bar', false, 100)
+client.on('connect', () => {
+  client.set('foo', 'bar', false, 100)
   .then(() => {
       return client.get('foo');
   })
@@ -35,6 +34,7 @@ client.connect()
     client.close();
   });
 });
+client.connect();
 ```
 
 ## Client Options
