@@ -180,13 +180,14 @@ class Memcached extends EventEmitter {
     ];
     return this.conn.command(command)
       .then(message => {
-        switch (message.code) {
+        const code = message.code;
+        switch (code) {
           case Message.EXISTS:
           case Message.STORED:
           case Message.NOT_STORED:
-            return Promise.resolve();
+            return Promise.resolve(code);
           default:
-            return Promise.reject();
+            return Promise.reject(code);
         }
       })
     ;
@@ -204,13 +205,14 @@ class Memcached extends EventEmitter {
     this.validateKey(key);
     return this.conn.command([`get ${key}`])
       .then(message => {
-        switch (message.code) {
+        const code = message.code;
+        switch (code) {
           case Message.END:
             return Promise.resolve(null);
           case Message.ERROR:
           case Message.SERVER_ERROR:
           case Message.CLIENT_ERROR:
-            return Promise.reject();
+            return Promise.reject(code);
           default:
             return Promise.resolve(message.getValue());
         }
@@ -231,15 +233,23 @@ class Memcached extends EventEmitter {
     keys.unshift('get');
     return this.conn.command([keys.join(' ')])
       .then(message => {
-        switch (message.code) {
+        const code = message.code;
+        switch (code) {
           case Message.END:
             return Promise.resolve(null);
           case Message.ERROR:
           case Message.SERVER_ERROR:
           case Message.CLIENT_ERROR:
-            return Promise.reject();
+            return Promise.reject(code);
           default:
-            return Promise.resolve(message.getMultiValues());
+            const values = message.getBulkValues();
+            keys.shift();
+            keys.forEach(k => {
+              if (!values.hasOwnProperty(k)) {
+                values[k] = null;
+              }
+            });
+            return Promise.resolve(values);
         }
       })
     ;
@@ -257,11 +267,12 @@ class Memcached extends EventEmitter {
     this.validateKey(key);
     return this.conn.command([`delete ${key}`])
       .then(message => {
-        switch (message.code) {
+        const code = message.code;
+        switch (code) {
           case Message.DELETED:
-            return Promise.resolve();
+            return Promise.resolve(code);
           default:
-            return Promise.reject();
+            return Promise.reject(code);
         }
       })
     ;
@@ -305,15 +316,14 @@ class Memcached extends EventEmitter {
    */
   incrOrDecr(commandName, key, value) {
     this.validateKey(key);
-    const command = [`${comamndName} ${key}, ${value}`];
+    const command = [`${commandName} ${key} ${value}`];
     return this.conn.command(command)
       .then(message => {
         const result = parseInt(message.rawData, 10);
         if (!isNaN(result)) {
-          Promise.resolve(result);
-        } else {
-          Promise.reject();
+          return Promise.resolve(result);
         }
+        return Promise.reject(message.code);
       })
     ;
   }
@@ -329,14 +339,15 @@ class Memcached extends EventEmitter {
    */
   touch(key, expires) {
     this.validateKey(key);
-    const command = [`touch ${key}, ${expires}`];
+    const command = [`touch ${key} ${expires}`];
     return this.conn.command(command)
       .then(message => {
-        switch (message.code) {
-          case Mesage.TOUCHED:
-            return Promise.resolve();
+        const code = message.code;
+        switch (code) {
+          case Message.TOUCHED:
+            return Promise.resolve(code);
           default:
-            return Promise.reject();
+            return Promise.reject(code);
         }
       })
     ;

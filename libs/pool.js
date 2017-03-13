@@ -78,10 +78,10 @@ class ConnectionPool {
    */
   destroy(host, port, conn) {
     const key = `${host}:${port}`;
-    if (!this.pool.hasOwnProperty(key) || !(conn instanceof Connection)) {
+    if (!this.pools.hasOwnProperty(key) || !(conn instanceof Connection)) {
       return;
     }
-    const pool = this.pool[key];
+    const pool = this.pools[key];
     const sid = conn.sid;
     conn = null;
     delete pool[sid];

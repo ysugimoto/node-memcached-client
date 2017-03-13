@@ -52,11 +52,19 @@ class Message {
    *
    * @static
    * @param {Buffer} buffer chunk buffer
+   * @param {Boolean} isNumberReply expected number reply
    * @return {Boolean} -
    */
-  static isEOF(buffer) {
+  static isEOF(buffer, isNumberReply = false) {
+    // Special case of incr / decr reply
+    if (isNumberReply && /^[0-9]+\r\n/.test(buffer.toString('utf8'))) {
+      return true;
+    }
+
     const EOFMessagList = [
       Message.STORED,
+      Message.NOT_STORED,
+      Message.NOT_FOUND,
       Message.ERROR,
       Message.EXISTS,
       Message.TOUCHED,
@@ -131,7 +139,7 @@ class Message {
    *
    * @return {String} -
    */
-  getMultiValues() {
+  getBulkValues() {
     const values = {};
     const buffer = this.buffer;
     let index = 0;
@@ -142,7 +150,7 @@ class Message {
       if (meta[0] === Message.END) {
         break;
       }
-      index = m + CRLF_LENGTH;
+      index = delim + CRLF_LENGTH;
       const dataSize = parseInt(meta[3], 10);
       values[meta[1]] = buffer.slice(index, index + dataSize).toString('utf8');
       index += dataSize + CRLF_LENGTH;
@@ -155,6 +163,7 @@ class Message {
 
 Message.STORED = 'STORED';
 Message.NOT_STORED = 'NOT_STORED';
+Message.NOT_FOUND = 'NOT_FOUND';
 Message.EXISTS = 'EXISTS';
 Message.END = 'END';
 Message.DELETED = 'DELETED';

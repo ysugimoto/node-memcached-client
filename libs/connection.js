@@ -153,12 +153,13 @@ class Connection extends EventEmitter {
   command(commands) {
     return new Promise(resolve => {
       this.enqueue(() => {
+        const isNumberReply = /^(incr|decr)/.test(commands[0]);
         // Server responds chunked reply due to cached data is too huge.
         // So we factory chunked buffer and concat these
         const message = new Message();
         const readReply = chunk => {
           message.append(chunk);
-          if (Message.isEOF(chunk)) {
+          if (Message.isEOF(chunk, isNumberReply)) {
             this.socket.removeListener('data', readReply);
             resolve(message.freeze());
             this.run();
