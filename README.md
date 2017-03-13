@@ -11,13 +11,13 @@ Client library of Memcached for nodejs using ES6 promisified methods
 
 ## Installation
 
-```
+```shell
 $ npm install node-memcached-client
 ```
 
 ## Usage
 
-```
+```js
 const Memcached = require('node-memcached-client');
 const client = new Memcached({
   host: 'localhost',
@@ -37,7 +37,7 @@ client.connect()
 });
 ```
 
-### Client Options
+## Client Options
 
 |         name         |   type  | default value |            description            |
 |:--------------------:|:-------:|:-------------:|:---------------------------------:|
