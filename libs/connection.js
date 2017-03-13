@@ -56,8 +56,8 @@ class Connection extends EventEmitter {
    */
   close() {
     this.clientClosed = true;
-    this.socket = null;
     this.socket.end();
+    this.socket = null;
     this.emit('destroy');
   }
 
@@ -153,9 +153,6 @@ class Connection extends EventEmitter {
   command(commands) {
     return new Promise(resolve => {
       this.enqueue(() => {
-        // Send each command suffixed by CRLF
-        commands.forEach(cmd => this.socket.write(`${cmd}\r\n`));
-
         // Server responds chunked reply due to cached data is too huge.
         // So we factory chunked buffer and concat these
         const message = new Message();
@@ -168,6 +165,13 @@ class Connection extends EventEmitter {
           }
         };
         this.socket.on('data', readReply);
+
+        // Send each command suffixed by CRLF
+        const send = `${commands.join('\r\n')}\r\n`;
+        // If socket blocks to write buffer, we should observe drain event and write again.
+        if (this.socket.write(send) === false) {
+          this.socket.once('drain', () => this.socket.write(send));
+        }
       });
     });
   }

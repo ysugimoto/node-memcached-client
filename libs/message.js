@@ -118,9 +118,12 @@ class Message {
    */
   getValue() {
     const buffer = this.buffer;
-    const start = buffer.indexOf(CRLF);
-    const end = buffer.indexOf(`${CRLF}END`);
-    return buffer.slice(start + CRLF_LENGTH, end).toString('utf8');
+    let start = buffer.indexOf(CRLF);
+    const meta = buffer.slice(0, start).toString('utf8').split(' ');
+    start += CRLF_LENGTH;
+    const value = buffer.slice(start, start + parseInt(meta[3], 10));
+
+    return value.toString('utf8');
   }
 
   /**
@@ -130,23 +133,20 @@ class Message {
    */
   getMultiValues() {
     const values = {};
-    let isFinished = false;
-    let buffer = this.buffer;
+    const buffer = this.buffer;
+    let index = 0;
 
     do {
-      const delim = buffer.indexOf(CRLF);
-      const meta = buffer.slice(0, delim).toString('utf8').split(' ');
-      buffer = buffer.slice(delim + CRLF_LENGTH);
-      let next = buffer.indexOf(`${CRLF}VALUE`);
-      let nextIndex = CRLF_LENGTH;
-      if (next === -1) {
-        next = buffer.lastIndexOf(`${CRLF}END`);
-        nextIndex = `${CRLF}END`.length;
-        isFinished = true;
+      const delim = buffer.indexOf(CRLF, index);
+      const meta = buffer.slice(index, delim).toString('utf8').split(' ');
+      if (meta[0] === Message.END) {
+        break;
       }
-      values[meta[1]] = buffer.slice(0, next).toString('utf8');
-      buffer = buffer.slice(next + nextIndex);
-    } while(!isFinished);
+      index = m + CRLF_LENGTH;
+      const dataSize = parseInt(meta[3], 10);
+      values[meta[1]] = buffer.slice(index, index + dataSize).toString('utf8');
+      index += dataSize + CRLF_LENGTH;
+    } while(true);
 
     return values;
   }
