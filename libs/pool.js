@@ -15,8 +15,6 @@ class ConnectionPool {
    * @param {Number} scaleThreshold threshold that scale out connection
    */
   constructor(maxPoolSize = 1, scaleThreshold = 100) {
-    super();
-
     this.maxPoolSize = maxPoolSize;
     this.scaleThreshold = scaleThreshold;
     this.pools = {};
