@@ -1,13 +1,12 @@
 'use strict';
 
-const EventEmitter = require('events').EventEmitter;
 const Connection = require('./connection.js');
 const Logger = require('./log.js');
 
 /**
  * Connection pool mamanger
  */
-class ConnectionPool extends EventEmitter {
+class ConnectionPool {
 
   /**
    * Constructor
@@ -51,6 +50,7 @@ class ConnectionPool extends EventEmitter {
     if (connections.length === 0) {
         const conn = this.createConnection(options);
         Logger.info(`Nothing any connection to ${key}, created sid:${conn.sid}`);
+        conn.on('destroy', () => this.destroy(host, port, conn));
         this.pools[key][conn.sid] = conn;
         return {connection: conn, created: true};
     }
@@ -59,6 +59,7 @@ class ConnectionPool extends EventEmitter {
       if (sid.length <= this.maxPoolSize) {
         const conn = this.createConnection(options);
         Logger.info(`Create new connection to scale out sid:${conn.sid}`);
+        conn.on('destroy', () => this.destroy(host, port, conn));
         this.pools[key][conn.sid] = conn;
         return {connection: conn, created: true};
       }
@@ -83,7 +84,6 @@ class ConnectionPool extends EventEmitter {
     }
     const pool = this.pool[key];
     const sid = conn.sid;
-    conn.close();
     conn = null;
     delete pool[sid];
     Logger.info(`Destroyed connection, sid: ${sid}`);
