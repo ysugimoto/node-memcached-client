@@ -4,6 +4,7 @@ Client library of Memcached for nodejs using ES6 promisified methods
 
 [![Build Status](https://travis-ci.org/ysugimoto/node-memcached-client.svg?branch=master)](https://travis-ci.org/ysugimoto/node-memcached-client)
 [![Coverage Status](https://coveralls.io/repos/github/ysugimoto/node-memcached-client/badge.svg)](https://coveralls.io/github/ysugimoto/node-memcached-client)
+[![Code Climate](https://codeclimate.com/github/ysugimoto/node-memcached-client/badges/gpa.svg)](https://codeclimate.com/github/ysugimoto/node-memcached-client)
 
 ## Features
 
