@@ -17,6 +17,8 @@ $ npm install node-memcached-client
 
 ## Usage
 
+Callback style connect:
+
 ```js
 const Memcached = require('node-memcached-client');
 const client = new Memcached({
@@ -35,6 +37,26 @@ client.on('connect', () => {
   });
 });
 client.connect();
+```
+
+Promise style connect:
+
+```js
+const Memcached = require('node-memcached-client');
+const client = new Memcached({
+  host: 'localhost',
+  port: 11211
+});
+
+client.connect()
+.then(c => {
+  c.set('foo', 'bar', false, 100)
+  .then(() => c.get('foo'))
+  .then(foo => {
+    console.log(foo); // bar
+    c.close();
+  });
+});
 ```
 
 ## Client Options

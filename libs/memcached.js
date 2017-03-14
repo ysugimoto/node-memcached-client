@@ -65,18 +65,26 @@ class Memcached extends EventEmitter {
    * @return {Void} -
    */
   connect() {
-    const c = Pool.pull(this.options.host, this.options.port, this.options);
-    this.conn = c.connection;
+    return new Promise(resolve => {
+      const c = Pool.pull(this.options.host, this.options.port, this.options);
+      this.conn = c.connection;
 
-    if (c.created) {
-      this.conn.on('mc.error', () => this.emit('mc.error'));
-      this.conn.on('timeout', () => this.emit('timeout'));
-      this.conn.on('connect', () => this.emit('connect'));
-      this.conn.on('close', () => this.emit('close'));
-    } else {
-      // We need to a bit delay to emit connect event if connection returns by pool
-      setTimeout(() => this.emit('connect'), 10);
-    }
+      if (c.created) {
+        this.conn.on('mc.error', () => this.emit('mc.error'));
+        this.conn.on('timeout', () => this.emit('timeout'));
+        this.conn.on('connect', () => {
+          this.emit('connect');
+          resolve(this);
+        });
+        this.conn.on('close', () => this.emit('close'));
+      } else {
+        // We need to a bit delay to emit connect event if connection returns by pool
+        setTimeout(() => {
+          this.emit('connect');
+          resolve(this);
+        }, 10);
+      }
+    });
   }
 
   /**

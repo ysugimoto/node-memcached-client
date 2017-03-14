@@ -12,7 +12,8 @@ const dat = "𠮷野屋で𩸽\r\n頼んで𠮟られる😭";
 
 client.on('close', () => console.log('Client closed'));
 client.on('reconnect', () => console.log('Cliend reconnected'));
-client.on('connect', () => {
+client.connect()
+.then(() => {
   client.set(key, dat, 0, 100)
   .then(() => {
     console.log(`Saved for key: ${key}`);
@@ -23,4 +24,3 @@ client.on('connect', () => {
     client.close();
   });
 });
-client.connect()
