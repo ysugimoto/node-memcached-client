@@ -284,6 +284,29 @@ describe('Memcached Class', () => {
           });
       }));
     });
-
   });
+
+  describe('huge data', () => {
+    const data = 'a'.repeat(1e5);
+    const keys = [];
+
+    before(() => {
+      for (let i = 0; i < 100; i++) {
+        const rand = Math.floor(Math.random() * (1e10 - 1) + 1);
+        client.set(rand, data);
+        keys.push(rand);
+      }
+    });
+
+    it('get', () => {
+      return Promise.all(keys.map(k => {
+        return client.get(k)
+          .then(msg => expect(msg).to.equal(data))
+          .catch(e => {
+            throw new Error(e);
+          });
+      }));
+    });
+  });
+
 });

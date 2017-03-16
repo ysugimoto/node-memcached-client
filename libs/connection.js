@@ -171,11 +171,10 @@ class Connection extends EventEmitter {
         this.socket.on('data', readReply);
 
         // Send each command suffixed by CRLF
-        const send = `${commands.join('\r\n')}\r\n`;
-        // If socket blocks to write buffer, we should observe drain event and write again.
-        if (this.socket.write(send) === false) {
-          this.socket.once('drain', () => this.socket.write(send));
-        }
+        commands.forEach(cmd => {
+          this.socket.write(Buffer.from(cmd.toString(), 'utf8'));
+          this.socket.write('\r\n');
+        });
       });
     });
   }
