@@ -1,6 +1,6 @@
 {
   "name": "node-memcached-client",
-  "version": "0.6.6",
+  "version": "0.6.7",
   "description": "Memcached client library for nodejs with ES6 promisified methods",
   "main": "index.js",
   "directories": {
