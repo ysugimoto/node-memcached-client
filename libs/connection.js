@@ -28,6 +28,7 @@ class Connection extends EventEmitter {
     this.clientClosed = false;
     this.timer = null;
     this.queue = [];
+    this.running = false;
   }
 
   /**
@@ -127,7 +128,7 @@ class Connection extends EventEmitter {
     this.queue.push(queue);
 
     // If connection has already established, run it
-    if (this.socket !== null) {
+    if (!this.running) {
       this.run();
     }
   }
@@ -138,9 +139,11 @@ class Connection extends EventEmitter {
    * @return {Void} -
    */
   run() {
-    if (this.queue.length === 0) {
+    if (this.queue.length === 0 || !this.socket) {
+      this.running = false;
       return;
     }
+    this.running = true;
     this.queue.shift()();
   }
 
@@ -163,6 +166,8 @@ class Connection extends EventEmitter {
             this.socket.removeListener('data', readReply);
             resolve(message.freeze());
             this.run();
+          } else {
+            console.log(chunk.toString('utf8'));
           }
         };
         this.socket.on('data', readReply);

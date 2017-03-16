@@ -8,12 +8,12 @@ const expect = chai.expect;
 
 describe('Memcached Class', () => {
   let client;
-  beforeEach((done) => {
+  before((done) => {
     client = new Memcached();
     client.on('connect', () => done());
     client.connect();
   });
-  afterEach(() => {
+  after(() => {
     client.close();
   });
 
@@ -262,5 +262,26 @@ describe('Memcached Class', () => {
       return client.touch(a, 990)
         .then(code => expect(code).to.equal('TOUCHED'));
     });
+  });
+
+  describe('concurrency', () => {
+    const keys = [];
+
+    before(() => {
+      for (let i = 0; i < 10000; i++) {
+        const rand = Math.floor(Math.random() * (1e10 - 1) + 1);
+        client.set(rand, rand);
+        keys.push(rand);
+      }
+    });
+
+    it('get', () => {
+      return Promise.all(keys.map(k => {
+        return client.get(k).catch(e => {
+          throw new Error(e);
+        });
+      }));
+    });
+
   });
 });
