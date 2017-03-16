@@ -61,7 +61,7 @@ class Message {
       return true;
     }
 
-    const EOFMessagList = [
+    const EOFMessageList = [
       Message.STORED,
       Message.NOT_STORED,
       Message.NOT_FOUND,
@@ -72,7 +72,7 @@ class Message {
       Message.END
     ];
 
-    return EOFMessagList.some(msg => {
+    return EOFMessageList.some(msg => {
       const index = buffer.indexOf(msg);
       return (index !== -1 && index + msg.length + CRLF_LENGTH === buffer.length);
     });
