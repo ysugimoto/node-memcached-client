@@ -277,9 +277,11 @@ describe('Memcached Class', () => {
 
     it('get', () => {
       return Promise.all(keys.map(k => {
-        return client.get(k).catch(e => {
-          throw new Error(e);
-        });
+        return client.get(k)
+          .then(msg => expect(msg).to.equal(k.toString()))
+          .catch(e => {
+            throw new Error(e);
+          });
       }));
     });
 
