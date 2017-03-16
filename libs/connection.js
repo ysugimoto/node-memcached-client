@@ -166,8 +166,6 @@ class Connection extends EventEmitter {
             this.socket.removeListener('data', readReply);
             resolve(message.freeze());
             this.run();
-          } else {
-            console.log(chunk.toString('utf8'));
           }
         };
         this.socket.on('data', readReply);
