@@ -268,7 +268,8 @@ describe('Memcached Class', () => {
     const keys = [];
 
     before(() => {
-      for (let i = 0; i < 10000; i++) {
+      const times = process.env.TRAVIS_TESTING ? 100 : 10000;
+      for (let i = 0; i < times; i++) {
         const rand = Math.floor(Math.random() * (1e10 - 1) + 1);
         client.set(rand, rand);
         keys.push(rand);
@@ -291,6 +292,7 @@ describe('Memcached Class', () => {
     const keys = [];
 
     before(() => {
+      const times = process.env.TRAVIS_TESTING ? 5 : 100;
       for (let i = 0; i < 100; i++) {
         const rand = Math.floor(Math.random() * (1e10 - 1) + 1);
         client.set(rand, data);
