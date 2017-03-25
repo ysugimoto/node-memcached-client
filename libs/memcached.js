@@ -239,7 +239,8 @@ class Memcached extends EventEmitter {
    *
    * @param {Array} keys cache key
    * @return {Promise} -
-   * @resolve {String|null} cache data
+   * @resolve {String|Object|null} cache data
+   *   If single key was supplied, return string. Otherwise return key mapped Object
    * @reject {Void}
    */
   get(...keys) {
@@ -273,7 +274,7 @@ class Memcached extends EventEmitter {
   /**
    * Get cache data from supplied key with cas unique
    *
-   * @param {String} key cache key
+   * @param {...String} key cache key list
    * @return {Promise} -
    * @resolve {Object|null} cache data map by key
    * @reject {Void}
