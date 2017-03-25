@@ -9,6 +9,7 @@ const DEFAULT_OPTIONS = {
   host: 'localhost',
   port: 11211,
   autoreconnect: false,
+  commandTimeout: 2000,
   reconnectDuration: 2000,
   maxRetryConnectCount: 10
 };
@@ -202,44 +203,49 @@ class Memcached extends EventEmitter {
   }
 
   /**
-   * Get "single" cache data from supplied key
+   * Send "cas" command
    *
    * @param {String} key cache key
+   * @param {String|Buffer} value store value
+   * @param {Booelan} isCompress flag of data should be compressed
+   * @param {Number} expires time to cache has expired (if supplied zero, the value is persitent)
+   * @param {String} unique cas unique
    * @return {Promise} -
-   * @resolve {String|null} cache data
-   * @reject {Void}
+   * @resolve {String} reply code
+   * @reject {String} reply code
    */
-  get(key) {
+  cas(key, value, isCompress = 0, expires = 0, unique = '') {
     this.validateKey(key);
-    return this.conn.command([`get ${key}`])
+    const byteSize = (value instanceof Buffer) ? Buffer.length : Buffer.byteLength(value, 'utf8');
+    const command = [
+      `cas ${key} ${isCompress ? 1 : 0} ${expires} ${byteSize} ${unique}`,
+      (value instanceof Buffer) ? value.toString('utf8') : value
+    ];
+    return this.conn.command(command)
       .then(message => {
         const code = message.code;
         switch (code) {
-          case Message.END:
-            return Promise.resolve(null);
-          case Message.ERROR:
-          case Message.SERVER_ERROR:
-          case Message.CLIENT_ERROR:
-            return Promise.reject(code);
+          case Message.STORED:
+            return Promise.resolve(code);
           default:
-            return Promise.resolve(message.getValue());
+            return Promise.reject(code);
         }
       })
     ;
   }
 
   /**
-   * Get "multiple" cache data from supplied key
+   * Get cache data from supplied key
    *
-   * @param {String} key cache key
+   * @param {Array} keys cache key
    * @return {Promise} -
-   * @resolve {Object|null} cache data map by key
+   * @resolve {String|Object|null} cache data
+   *   If single key was supplied, return string. Otherwise return key mapped Object
    * @reject {Void}
    */
-  gets(...keys) {
+  get(...keys) {
     keys.forEach(k => this.validateKey(k));
-    keys.unshift('get');
-    return this.conn.command([keys.join(' ')])
+    return this.conn.command([`get ${keys.join(' ')}`])
       .then(message => {
         const code = message.code;
         switch (code) {
@@ -250,8 +256,46 @@ class Memcached extends EventEmitter {
           case Message.CLIENT_ERROR:
             return Promise.reject(code);
           default:
+            if (keys.length === 1) {
+              return Promise.resolve(message.getValue());
+            }
             const values = message.getBulkValues();
-            keys.shift();
+            keys.forEach(k => {
+              if (!values.hasOwnProperty(k)) {
+                values[k] = null;
+              }
+            });
+            return Promise.resolve(values);
+        }
+      })
+    ;
+  }
+
+  /**
+   * Get cache data from supplied key with cas unique
+   *
+   * @param {...String} key cache key list
+   * @return {Promise} -
+   * @resolve {Object|null} cache data map by key
+   * @reject {Void}
+   */
+  gets(...keys) {
+    keys.forEach(k => this.validateKey(k));
+    return this.conn.command([`gets ${keys.join(' ')}`])
+      .then(message => {
+        const code = message.code;
+        switch (code) {
+          case Message.END:
+            return Promise.resolve(null);
+          case Message.ERROR:
+          case Message.SERVER_ERROR:
+          case Message.CLIENT_ERROR:
+            return Promise.reject(code);
+          default:
+            if (keys.length === 1) {
+              return Promise.resolve(message.getObjectValue());
+            }
+            const values = message.getBulkObjectValues();
             keys.forEach(k => {
               if (!values.hasOwnProperty(k)) {
                 values[k] = null;

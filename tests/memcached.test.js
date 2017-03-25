@@ -160,6 +160,32 @@ describe('Memcached Class', () => {
     });
   });
 
+  describe('#cas', () => {
+    const rand = Math.floor(Math.random() * (1e10 - 1) + 1);
+    const a = `a_${rand}`;
+    const dat = 'cas data';
+
+    beforeEach(() => {
+      return client.set(a, dat);
+    });
+
+    it('should update value if cas unique matched', () => {
+      return client.gets(a)
+        .then(code => {
+          const cas = code.cas;
+          return client.cas(a, 'cas data updated', 0, 100, cas);
+        })
+        .then(code => expect(code).to.equal('STORED'));
+    });
+    it('should not update value if cas unique does not matched', () => {
+      return client.gets(a)
+        .then(code => {
+          return client.cas(a, 'cas data updated', 0, 100, '9999');
+        })
+        .catch(code => expect(code).to.equal('EXISTS'));
+    });
+  });
+
   describe('#get', () => {
     const rand = Math.floor(Math.random() * (1e10 - 1) + 1);
     const a = `a_${rand}`;
@@ -196,8 +222,8 @@ describe('Memcached Class', () => {
       return client.gets(a, b)
         .then(value => {
           expect(value).to.have.keys([a, b]);
-          expect(value[a]).to.equal(dat01);
-          expect(value[b]).to.equal(dat02);
+          expect(value[a].value).to.equal(dat01);
+          expect(value[b].value).to.equal(dat02);
         });
     });
   });

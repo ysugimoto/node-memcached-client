@@ -122,4 +122,35 @@ describe('Message Class', () => {
       expect(values.lorem).to.equal('ipsum');
     });
   });
+
+  describe('#getObjectValue', () => {
+    beforeEach(() => {
+      m.append(Buffer.from('VALUE foo 0 3 100\r\nbar\r\nEND\r\n', 'utf8'));
+      m.freeze();
+    });
+
+    it('should return Object that has expected keys', () => {
+      const value = m.getObjectValue();
+      expect(value).have.keys(['key', 'flags', 'value', 'bytes', 'cas']);
+      expect(value.cas).to.equal('100');
+      expect(value.value).to.equal('bar');
+    });
+  });
+
+  describe('#getBulkObjectValues', () => {
+    beforeEach(() => {
+      m.append(Buffer.from('VALUE foo 0 3 100\r\nbar\r\n', 'utf8'));
+      m.append(Buffer.from('VALUE lorem 0 5 200\r\nipsum\r\nEND\r\n', 'utf8'));
+      m.freeze();
+    });
+
+    it('should return parsed bulk value as object', () => {
+      const values = m.getBulkObjectValues();
+      expect(values).have.keys(['foo', 'lorem']);
+      expect(values.foo).have.keys(['key', 'flags', 'value', 'bytes', 'cas']);
+      expect(values.foo.value).to.equal('bar');
+      expect(values.lorem).have.keys(['key', 'flags', 'value', 'bytes', 'cas']);
+      expect(values.lorem.value).to.equal('ipsum');
+    });
+  });
 });
