@@ -125,21 +125,51 @@ class Message {
    * @return {String} -
    */
   getValue() {
+    return this.getObjectValue().value;
+  }
+
+  /**
+   * Get parsed multiple-value from "get" command response
+   *
+   * @return {Object} -
+   */
+  getBulkValues() {
+    const values = this.getBulkObjectValues();
+    const ret = {};
+    Object.keys(values).forEach(k => {
+      ret[k] = values[k].value;
+    });
+
+    return ret;
+  }
+
+  /**
+   * Get parsed value from "gets" command response contains "cas unique"
+   *
+   * @return {Object} -
+   */
+  getObjectValue() {
     const buffer = this.buffer;
     let start = buffer.indexOf(CRLF);
     const meta = buffer.slice(0, start).toString('utf8').split(' ');
     start += CRLF_LENGTH;
     const value = buffer.slice(start, start + parseInt(meta[3], 10));
 
-    return value.toString('utf8');
+    return {
+      key: meta[1],
+      flags: meta[2],
+      bytes: meta[3],
+      value: value.toString('utf8'),
+      cas: meta[4] || null
+    };
   }
 
   /**
-   * Get parsed multiple-value from "gets" command response
+   * Get parsed multiple-value from "gets" command response contains "cas unique"
    *
-   * @return {String} -
+   * @return {Object} -
    */
-  getBulkValues() {
+  getBulkObjectValues() {
     const values = {};
     const buffer = this.buffer;
     let index = 0;
@@ -152,13 +182,18 @@ class Message {
       }
       index = delim + CRLF_LENGTH;
       const dataSize = parseInt(meta[3], 10);
-      values[meta[1]] = buffer.slice(index, index + dataSize).toString('utf8');
+      values[meta[1]] = {
+        key: meta[1],
+        flags: meta[2],
+        bytes: meta[3],
+        value: buffer.slice(index, index + dataSize).toString('utf8'),
+        cas: meta[4] || null
+      };
       index += dataSize + CRLF_LENGTH;
     } while(true);
 
     return values;
   }
-
 }
 
 Message.STORED = 'STORED';
