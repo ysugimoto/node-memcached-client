@@ -65,13 +65,14 @@ client.connect()
 
 ## Client Options
 
-|         name         |   type  | default value |            description            |
-|:--------------------:|:-------:|:-------------:|:---------------------------------:|
-|         host         |  string |  'localhost'  |    Memcached server to connect    |
-|         port         |  Number |     11211     |     Memcached port to connect     |
-|     autoreconnect    | Boolean |     false     |     Client tries to reconnect     |
-|   reconnectDuration  |  Number |      2000     | Duration time of reconnect (msec) |
-| maxRetryConnectCount |  Numer  |       10      |      Retry times to reconnect     |
+|         name         |   type  | default value |            description                   |
+|:--------------------:|:-------:|:-------------:|:----------------------------------------:|
+|         host         |  string |  'localhost'  |    Memcached server to connect           |
+|         port         |  Number |     11211     |     Memcached port to connect            |
+|     autoreconnect    | Boolean |     false     |     Client tries to reconnect            |
+|     commandTimeout   |  Number |     2000      | Duration times of command timeout (msec) |
+|   reconnectDuration  |  Number |      2000     | Duration times of reconnect (msec)       |
+| maxRetryConnectCount |  Numer  |       10      |      Retry times to reconnect            |
 
 ## Connection Pooling Settings
 

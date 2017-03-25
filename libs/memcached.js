@@ -9,7 +9,7 @@ const DEFAULT_OPTIONS = {
   host: 'localhost',
   port: 11211,
   autoreconnect: false,
-  commandTimeout: 3000,
+  commandTimeout: 2000,
   reconnectDuration: 2000,
   maxRetryConnectCount: 10
 };
