@@ -147,6 +147,12 @@ class Connection extends EventEmitter {
     this.queue.shift()();
   }
 
+  timeout() {
+    console.log('emit timeout');
+    this.emit('timeout');
+    this.socket.destroy(new Error('Command timeout'));
+  }
+
   /**
    * Send commands to socket
    *
@@ -156,6 +162,7 @@ class Connection extends EventEmitter {
   command(commands) {
     return new Promise(resolve => {
       this.enqueue(() => {
+        let timer;
         const isNumberReply = /^(incr|decr)/.test(commands[0]);
         // Server responds chunked reply due to cached data is too huge.
         // So we factory chunked buffer and concat these
@@ -163,6 +170,7 @@ class Connection extends EventEmitter {
         const readReply = chunk => {
           message.append(chunk);
           if (Message.isEOF(chunk, isNumberReply)) {
+            clearTimeout(timer);
             this.socket.removeListener('data', readReply);
             resolve(message.freeze());
             this.run();
@@ -175,6 +183,9 @@ class Connection extends EventEmitter {
           this.socket.write(Buffer.from(cmd.toString(), 'utf8'));
           this.socket.write('\r\n');
         });
+        // Set command timeout queue
+        timer = setTimeout(() => this.timeout(), this.options.commandTimeout);
+
       });
     });
   }
