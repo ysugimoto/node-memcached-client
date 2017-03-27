@@ -2,7 +2,7 @@
 
 const CRLF = '\r\n';
 const CRLF_LENGTH = CRLF.length;
-const CRLF_TAIL = new RegExp('\r\n$');
+const CRLF_TAIL = /\r\n$/;
 
 /**
  * Socket reply message wrapper
