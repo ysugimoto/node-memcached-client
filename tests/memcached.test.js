@@ -338,3 +338,27 @@ describe('Memcached Class', () => {
   });
 
 });
+
+
+describe('Memcached (timeouts)', function() {
+  let client;
+
+  before(() => {
+    client = new Memcached({ commandTimeout: 1 });
+    return client.connect();
+  });
+
+  after(() => {
+    return client.close();
+  });
+
+  describe('command timeout', function() {
+    const rand = Math.floor(Math.random() * (1e10 - 1) + 1);
+    const a = `a_${rand}`;
+    const data = 'a'.repeat(1e8);
+
+    it('should reject the promise', function() {
+      return expect(client.set(a, data)).to.be.rejected;
+    });
+  });
+});

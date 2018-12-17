@@ -57,9 +57,11 @@ class Connection extends EventEmitter {
    */
   close() {
     this.clientClosed = true;
-    this.socket.end();
-    this.socket = null;
-    this.emit('destroy');
+    if (this.socket) {
+      this.socket.end();
+      this.socket = null;
+      this.emit('destroy');
+    }
   }
 
   /**
@@ -164,11 +166,8 @@ class Connection extends EventEmitter {
    * @return {Promise} -
    */
   command(commands) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       this.enqueue(() => {
-        // Set command timeout queue
-        const timer = setTimeout(() => this.timeout(), this.options.commandTimeout);
-
         const isNumberReply = /^(incr|decr)/.test(commands[0]);
         // Server responds chunked reply due to cached data is too huge.
         // So we factory chunked buffer and concat these
@@ -190,6 +189,11 @@ class Connection extends EventEmitter {
           this.socket.write('\r\n');
         });
 
+        // Set command timeout queue
+        const timer = setTimeout(() => {
+          this.timeout();
+          reject(new Error('Command timeout'));
+        }, this.options.commandTimeout);
       });
     });
   }
