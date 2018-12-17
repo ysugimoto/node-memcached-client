@@ -182,10 +182,11 @@ class Memcached extends EventEmitter {
    */
   store(commandName, key, value, isCompress, expires) {
     this.validateKey(key);
-    const byteSize = (value instanceof Buffer) ? Buffer.length : Buffer.byteLength(value, 'utf8');
+    const stringValue = value.toString();
+    const byteSize = (value instanceof Buffer) ? Buffer.length : Buffer.byteLength(stringValue, 'utf8');
     const command = [
       `${commandName} ${key} ${isCompress ? 1 : 0} ${expires} ${byteSize}`,
-      (value instanceof Buffer) ? value.toString('utf8') : value
+      (value instanceof Buffer) ? value.toString('utf8') : stringValue
     ];
     return this.conn.command(command)
       .then(message => {
