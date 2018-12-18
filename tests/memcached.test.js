@@ -160,6 +160,17 @@ describe('Memcached Class', () => {
     });
   });
 
+  describe('#set with buffer', () => {
+    const rand = Math.floor(Math.random() * (1e10 - 1) + 1);
+    const a = `a_${rand}`;
+
+    it('should set value', () => {
+      const value = Buffer.from('lorem ipsum');
+      return client.set(a, value)
+        .then(code => expect(code).to.equal('STORED'));
+    });
+  });
+
   describe('#cas', () => {
     const rand = Math.floor(Math.random() * (1e10 - 1) + 1);
     const a = `a_${rand}`;
