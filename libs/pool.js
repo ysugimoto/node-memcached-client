@@ -28,7 +28,7 @@ class ConnectionPool {
   }
 
   /**
-   * Get pool connection or create new
+   * Get pool connection or create a new connection
    *
    * @param {String} host server host
    * @param {Number} port server port
@@ -39,7 +39,7 @@ class ConnectionPool {
     const key = `${host}:${port}`;
     const pool = this.pools[key] || (this.pools[key] = {});
 
-    // Find most leisure connection at this time
+    // Find least busy connection at this time
     const connections = Object.keys(pool)
       .map(k => pool[k])
       .sort((a, b) => a.queue.length > b.queue.length ? 1 : -1);
@@ -47,12 +47,12 @@ class ConnectionPool {
     // If there isn't connection in pool, create new connection
     if (connections.length === 0) {
         const conn = this.createConnection(options);
-        Logger.info(`Nothing any connection to ${key}, created sid:${conn.sid}`);
+        Logger.info(`No connections exist to ${key}, created sid:${conn.sid}`);
         conn.on('destroy', () => this.destroy(host, port, conn));
         this.pools[key][conn.sid] = conn;
         return {connection: conn, created: true};
     }
-    // If connection have queue stack over threshold, try to create new connection
+    // If connection has too many queued items, try to create a new connection
     if (connections[0].queue.length > options.scaleThreshold) {
       if (sid.length <= this.maxPoolSize) {
         const conn = this.createConnection(options);

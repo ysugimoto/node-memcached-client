@@ -42,7 +42,8 @@ class Connection extends EventEmitter {
       port: this.options.port
     });
 
-    // Do not emit "error" event because process exitted if error did not handle at client
+    // Do not emit "error" event because the process will exit if the client
+    // does not handle the error.
     // So we emit "mc.error" instead.
     this.socket.on('error', () => this.emit(`mc.error`));
     this.socket.on('timeout', () => this.emit(`timeout`));
@@ -71,7 +72,7 @@ class Connection extends EventEmitter {
    */
   handleConnect() {
     this.retryCount = 0;
-    // We socketect on first time!
+    // We connected on the first try!
     if (this.firstConnect) {
       Logger.info('Client connected');
       this.emit(`connect`, this.socket);
@@ -81,7 +82,8 @@ class Connection extends EventEmitter {
       Logger.info('Client reconnected');
       this.emit(`reconnect`);
     }
-    // Support async command running. If command enqueued before connection to server, run and flush it
+    // Support async command running. If a command was enqueued before
+    // connection to server, run and flush it
     this.run();
   }
 
@@ -93,14 +95,14 @@ class Connection extends EventEmitter {
   handleClose() {
     this.emit(`close`);
 
-    // If socketection closed due to unexpected reason, retry to socketect server
+    // If connection closed due to unexpected reason, retry to connect to server
     if (!this.clientClosed) {
       this.retry();
     }
   }
 
   /**
-   * Retry to socketect memcached server
+   * Retry to connect to memcached server
    *
    * @return {Void} -
    */
@@ -115,7 +117,7 @@ class Connection extends EventEmitter {
       this.close();
       return;
     }
-    Logger.warn(`Cannot connected to memcached server. Try to reconnecting...`);
+    Logger.warn(`Cannot connect to memcached server. Trying to reconnect...`);
     clearTimeout(this.timer);
     this.timer = setTimeout(() => this.connect(), this.options.reconnectDuration);
   }
@@ -129,7 +131,7 @@ class Connection extends EventEmitter {
   enqueue(queue) {
     this.queue.push(queue);
 
-    // If connection has already established, run it
+    // If connection has already been established, run it
     if (!this.running) {
       this.run();
     }
